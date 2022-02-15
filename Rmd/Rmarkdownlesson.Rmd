@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+changing echo = in the set up chuck 
+
+# header 1
+## header 2
+### header 3
+#### header 4
+
+sample text **bold text**
+
+Need to have spaces between the line above to put text into a new paragraph 
+
+* item 1
+* item 2
+* item 3
+
+*italic text*
+
+1. item 1
+2. item 2
+3. item 3
+
+or use just "1's" and it will order it automaticaly
+
+1. item 1
+1. item 2
+1. item 3
+
+Add code chunk with 
+
++ (ctrl + alt + i)
+
+running code
+
+- cntrl + enter
+  - good for running individual expressions/lines of code within a code chunk
+
+```{r}
+x <- 3 + 2
+x <- 2
+```
+
+## Read in data
+
+```{r}
+  bg_chem <- read.csv("../Data/BGchem2008data.csv")
+```
+pressing "Tab" after the ../ autofill options for you to select from 
+
+## Analysis 
+
+
+## Plots 
+```{r}
+plot(bg_chem$CTD_Depth, bg_chem$CTD_Temperature)
+```
+this is the same code as above but will print the graph without showing the code when its knit together 
+
+```{r, echo=FALSE}
+plot(bg_chem$CTD_Depth, bg_chem$CTD_Temperature)
+```
+
+
+see:
+help>cheat sheets > r markdown cheat sheet (or reference guide) for differnt chunk options 
+
+
+
+
+
+
+
