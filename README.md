@@ -6,5 +6,6 @@ This is a readme file test.
 
 Nicole added stuff :)
 
-creating conflict #2 - nicole
+nicole and Jessie creating conflict #2 
+
 
