@@ -70,10 +70,14 @@ plot(bg_chem$CTD_Depth, bg_chem$CTD_Temperature)
 
 
 see:
-help>cheat sheets > r markdown cheat sheet (or reference guide) for differnt chunk options 
+help>cheat sheets > r markdown cheat sheet (or reference guide) for different chunk options 
 
 
+# intro to git 
 
+- learned how to connect Rstudio to github, and visa versa 
+- learned how to make edits and push to github
+    - helpful for version control when working in groups
 
 
 
