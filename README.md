@@ -6,5 +6,5 @@ This is a readme file test.
 
 Nicole added stuff :)
 
-Jessie added stuff too, today on Tuesday, Nicole changed line 9 :)
+creating conflict #2 - nicole
 
