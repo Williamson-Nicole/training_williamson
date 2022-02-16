@@ -14,8 +14,17 @@ knitr::opts_chunk$set(echo = TRUE)
 - [Data tidying Notes](Rmd/data-tidying.html)
 - [Rmarkdown lession](Rmd/Rmarkdownlesson.html)
 
-*in the code above ^ you can also paste links directly into ()*
+![](Images/37-IMG_4634.jpg)
 
-**To update the website you must update the .htmls**
+```{r, echo=FALSE}
+#in the code above ^ you can also paste links directly into ()
 
-- this means you must KNIT to update
+#To update the website you must update the .htmls
+  #this means you must KNIT to update
+
+#also can use #Blogdown to make a website, or #Bookdown
+```
+
+
+
+
