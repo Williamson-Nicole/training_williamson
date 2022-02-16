@@ -1,0 +1,212 @@
+---
+title: "Data Tidying"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+set warning and messages are set to false so that they do not show up when you knit the document
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+```
+
+-   only need to install packages once, then you just need to use the library() tool
+
+### Knitting tips
+
+-   knitting is a good way to make sure your code is reproducible
+-   it reruns all your code in a fresh environemnt so it will tease out some error
+
+### Reading in a dataset
+
+right-click the download button from the website where the data is located...select "copy link" and then paste the link below.
+
+-   this is good for making data reproducible and sharing it with colleges
+-   read_csv (from readr is better for reading in large documents and is a little smarter than read.csv which is a base r package
+
+```{r}
+catch_origonal <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+```
+
+## Clean data
+
+%>% is a pipe operator which connects the output of one function to the next argument
+
+-   reads as "and then"
+
+-   good for writing efficient code
+
+    -   BUT breaking things up into intermediate steps helps to make it more readable
+    -   strike a balance between the two
+
+-   shortcut is Ctrl + Shift + M
+
+select() function can be used to pull out specifc columns you want, or can be used to drop specific columns
+
+```{r}
+catch_data <- catch_origonal %>% 
+  #select(Region, Year, Chinook, Coho, Pink, Chum, Sockeye)
+  select(-All, -notesRegCode)
+
+#ways to check out what your data looks like
+  #head(catch_origonal)
+  #glimpse()
+  #summary()
+```
+
+Chinook column is listed as character when we know it should be numeric...
+
+-   use the code below to try and change the column to numeric
+
+    -   we get an error saying at least one value was changed to NA not a number
+    -   so we need to look at the data and see which row(s) gave the error
+
+    ```{r}
+    catch_clean <- catch_data %>%
+      mutate(Chinook = as.numeric(Chinook))
+    ```
+
+Looking for error in the file...
+
+-   which() function returns indices where something is true
+
+```{r}
+i <- which(is.na(catch_clean$Chinook))
+catch_origonal[i, ] # this is used to print the i row and all the columns
+```
+
+Change the character from I to 1 if_else() says if this condition = "something", then replace with "something else"
+
+```{r}
+catch_clean <- catch_data %>%
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>%
+  mutate(Chinook = as.numeric(Chinook))
+```
+
+### Reshaping data
+
+Changing from wide to long format
+
+**-C()**
+
+-   specifies what columns NOT to pivot over
+
+**names_to =**
+
+-   names the new column that the old ones are condenses into
+
+**values_to =**
+
+-   names the new column that the values are being put into
+
+**rename()**
+
+- easily rename column names 
+- and other things??
+
+```{r}
+catch_long <- catch_clean %>%
+  pivot_longer(cols = -c(Region, Year), names_to = "Species", values_to = "Catch") %>%
+  rename(catch_thousands = Catch) %>%
+  mutate(catch = catch_thousands * 1000)
+
+
+head(catch_long)
+```
+
+"..." in descriptions means other arguments you can use
+
+- unnamed vectors will be used so you probably will need ""
+
+
+**starts_with()**
+
+-   selects things based on what they start with
+
+Changing from long to wide
+```{r}
+catch_wide <- catch_long %>%
+  pivot_wider(names_from = Region, values_from = catch)
+
+head(catch_wide)
+```
+
+**Quoted and unquoted variable names**
+
+- if a column name already exists, you don't need quotes
+- if you are creating a new variable name then you must use quotes
+  - there are some inconsistancies where it will let you run functions using quotes areound variable names that already exist 
+
+## Split-Apply-Combine
+
+```{r}
+mean_region <- catch_long %>%
+  filter(Species == "Sockeye") %>%
+  group_by(Region, Species) %>%
+  summarise(catch_mean = mean(catch), 
+            n = n())
+
+head(mean_region)
+```
+**group_by()**
+
+- stores other information you cant readily see
+- .groups = "drops" drops the grouping again
+
+**summarise()**
+
+- can add n = n() to get the number of observations used 
+    - probably good for catching issues with averaging across replicates (ie; for LTER cover data if it averages across 7 quads instead of 8 because it dropped a row due to a 0 value)
+
+**filter()**
+
+- works a lot like "subset()"
+
+## Joins
+
+loading in a second datset with full region names
+```{r}
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+```
+this gives and error because there are no common column names
+```{r}
+#catch_joined <- left_join(catch_long, region_defs)
+```
+The addion to this code specifys wich columsn to join by if the coumn names do not match (instead of having to rename them)
+
+- either way you should still add the "by = " part so that it doesn't just guess what to combine by
+    - catch_joined <- left_join(catch_long, region_defs, by = "Region")
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region" = "code"))
+
+nrow(catch_joined) == nrow(catch_long)
+```
+**anti-join**
+  *haven't gone over this but something you can look into*
+
+- shows you what doesn't have matches
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
