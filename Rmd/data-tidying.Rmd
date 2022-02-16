@@ -7,8 +7,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-set warning and messages are set to false so that they do not show up when you knit the document
 
+
+
+*set warning and messages are set to false so that they do not show up when you knit the document*
 ```{r, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyr)
