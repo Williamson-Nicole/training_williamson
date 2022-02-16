@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Nicole's test site"
 output: html_document
 ---
 
@@ -7,22 +7,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Research projects 
 
-```{r cars}
-summary(cars)
-```
+- [Data tidying Notes](Rmd/data-tidying.html)
+- [Rmarkdown lession](Rmd/Rmarkdownlesson.html)
 
-## Including Plots
+*in the code above ^ you can also paste links directly into ()*
 
-You can also embed plots, for example:
+**To update the website you must update the .htmls**
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+- this means you must KNIT to update
