@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ![](Images/37-IMG_4634.jpg)
+*adorable tundra vole reporting for duty!*
 
 ```{r, echo=FALSE}
 #in the code above ^ you can also paste links directly into ()
