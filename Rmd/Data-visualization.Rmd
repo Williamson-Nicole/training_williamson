@@ -61,3 +61,49 @@ instead of listing [Species == "Sockeye" | Species == "Chinook" ...ect]
 - better for dealing with dates
 
 
+```{r}
+
+ggplot(Mean_esc_year, aes(x = Species, y = escapement, fill = SASAP.Region)) +
+  geom_col()+
+  scale_color_brewer(palette = "Dark2")+
+theme()
+```
+
+**create your own theme call**
+```{r}
+my_theme <- theme_bw()+
+  theme(legend.position = "bottom")
+
+Mean_esc_year %>%
+  filter(SASAP.Region == "Kodiak") %>% 
+ggplot(aes(x = Year, y = escapement, color = Species)) + 
+   geom_line() +
+    geom_point() +
+    scale_y_continuous(labels = comma, n.breaks = 4) +
+    ylab("Escapement") +
+    ggtitle("Kodiak Salmon Escapement") +
+    my_theme
+```
+
+**Patchwork Package**
+
+- good for combining distinct graphs into one figure
+
+## Leaflet
+- makes interactive maps
+
+```{r}
+locations <- esc %>%
+  distinct(Location, Latitude, Longitude) %>%
+  drop_na
+
+leaflet(locations) %>% 
+  addTiles() %>% 
+  addMarkers(lng = ~Longitude, lat = ~Latitude, popup = ~ Location)
+```
+
+
+
+
+
+
