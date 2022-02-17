@@ -1,0 +1,63 @@
+---
+title: "Data visualization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(leaflet)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(DT)
+  library(scales) # install.packages("scales")
+```
+
+```{r}
+data_url <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e"
+
+esc <- tryCatch(
+    read.csv("data/escapement.csv"),
+    error=function(cond) {
+        message(paste("Escapement file does not seem to exist, so get it from the KNB."))
+        esc <- read.csv(url(data_url, method = "libcurl"))
+        return(esc)
+    }
+)
+
+head(esc)
+```
+
+## TryCatch
+
+- saying to use local file if you have it, if not, print a message and then grab the dataset from on online source
+- makes code more robust and reproducible because anyone can use it wether they have the file locally or not
+
+
+```{r}
+annual_esc <- esc %>%
+  separate(sampleDate, into = c("Year", "Month", "Day"), sep = "-") %>%
+  mutate(Year = as.numeric(Year))
+
+Mean_esc_year <- annual_esc %>%
+  group_by(Year, SASAP.Region, Species) %>%
+  summarise(escapement = sum(DailyCount), 
+            n = n()) %>%
+  filter(Species %in% c("Sockeye", "Chinook", "Coho", "Pink", "Chum"))
+
+head(Mean_esc_year)
+```
+
+instead of listing [Species == "Sockeye" | Species == "Chinook" ...ect]
+
+- use %in% c() 
+
+**lubridate package** 
+
+- lubridate::year()
+- better for dealing with dates
+
+
