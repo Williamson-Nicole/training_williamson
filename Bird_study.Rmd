@@ -1,0 +1,144 @@
+---
+title: "Bird Study"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rvest)
+library(readr)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+```
+
+```{r}
+
+webpage <- read_html("https://www.pwrc.usgs.gov/bbl/manual/speclist.cfm")
+
+tbls <- html_nodes(webpage, "table") %>% 
+    html_table(fill = TRUE)
+
+species <- tbls[[1]] %>% 
+    clean_names() %>% 
+    select(alpha_code, common_name) %>% 
+    mutate(alpha_code = tolower(alpha_code))
+
+```
+
+```{r}
+pred_origonal <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A9ffec04c-7e2d-41dd-9e88-b6c2e8c4375e")
+
+nest_origonal <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A982bd2fc-4edf-4da7-96ef-0d11b853102d")
+```
+  
+left join -- how to add new column with species names
+```{r}
+pred_joined <- left_join(pred_origonal, species, by = c("species" = "alpha_code"))
+```
+  
+create a function
+```{r}
+
+species_func <- function(L.table, R.table){
+  joined <- left_join(L.table, R.table, by = c("species" = "alpha_code"))
+  return(joined)
+}
+
+```
+**See workbook for ways to make this function more robust**
+
+- stops the run if columns don't match
+- costume checks for errors
+
+
+use function 
+```{r}
+
+pred_joined2 <- species_func(pred_origonal, species)
+pred_joined == pred_joined2 #logic check 
+
+nest_joined <- species_func(nest_origonal, species)
+
+```
+
+sum nest and predator totals by species and year
+```{r}
+
+sum_pred_year_spec <- pred_joined2 %>%
+  group_by(year, common_name) %>%
+  summarise(pred_sum = sum(count), 
+            n = n())
+
+sum_nest_year_spec <- nest_joined %>%
+  group_by(year, common_name) %>%
+  summarise(nest_sum = sum(number_eggs_predated),
+            n = n())
+
+head(nest_joined)
+```
+
+Plot pred vs year
+```{r}
+
+sum_pred_year_spec %>%
+ggplot(aes(x = year, y = pred_sum, color = common_name))+
+   geom_line() +
+    geom_point() +
+    ylab("number of predators")
+    
+```
+
+sum pred and species by year and 
+```{r}
+
+sum_pred_year <- pred_joined2 %>%
+  group_by(year) %>%
+  summarise(pred_sum = sum(count), 
+            n = n())
+
+sum_nest_year <- nest_joined %>%
+  group_by(year) %>%
+  summarise(nest_sum = sum(number_eggs_predated), 
+            n = n())
+
+nest_pred <- left_join(sum_pred_year, sum_nest_year, by = "year")
+
+```
+
+Graph pred vs nest
+```{r}
+
+nest_pred %>%
+ggplot(aes(x = pred_sum, y = nest_sum))+
+   geom_point() +
+    xlab("Predator")+
+    ylab("Predated Eggs")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
