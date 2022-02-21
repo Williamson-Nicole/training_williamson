@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Research projects 
 
+- [Helpful R links](Rmd/Helpful-links.html)
 - [Data tidying Notes](Rmd/data-tidying.html)
 - [Rmarkdown lession](Rmd/Rmarkdownlesson.html)
 - [Data visualization2](Rmd/Data-visualization.html)
