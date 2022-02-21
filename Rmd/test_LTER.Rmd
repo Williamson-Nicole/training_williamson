@@ -1,0 +1,299 @@
+---
+title: "test_LTER"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(readr)
+```
+
+
+```{r}
+LTER_cover_origonal <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-arc.20084.2&entityid=66dcbe2b73b3f5bb606072705e5f1fd7")
+```
+
+```{r}
+unique(LTER_cover_origonal$Species)
+```
+
+**Check unique vales in each column to make sure that there are not naming errors**
+small differences in how the names of a species was abbreviated will be read in as a different species
+  Common mistakes include:
+  - extra spaces
+  - differences in capitalization
+  - periods being in different spots 
+  - spelling errors
+    - eg; `bare` `Bare` `Bare ` and `Bare.` will all be read as a unique species name instead of as one species
+```{r}
+unique(LTER_cover_origonal$Species)
+```
+
+If there are mistakes then rename them using the code below, then recheck unique values again to make sure the recode worked *and you didn't loose any observations*
+```{r}
+
+# example of how to correct naming convention errors 
+#LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Bare" = "bare")
+```
+
+**Now I want to group some like things togeather that are currently identified to a level more specific than necessary**
+
+- eg. Standing dead 'St. D.' is identified to species level but we don't need it to be so specific for our needs so we will *change the name* to just standing dead evergreen 'St. D. Evrg'
+```{r}
+#simplify groups 
+
+  #group all standing dead evergreens together
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "St. D. Led Pal" = "St. D. Evrg")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Dead Evrg" = "St. D. Evrg")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Dead Bet" = "St. D. Evrg")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "St. D. Bet" = "St. D. Evrg")
+
+  #group all grasses together 
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Cal can" = "grass")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Grass ex." = "grass")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Car big" = "grass")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Arc lat" = "grass")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Cal lap" = "grass")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Fes sp." = "grass")
+
+  #group all St. D together 
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "St. D. Sal" = "St. D")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "St. D. Bet." = "St. D")
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "St. D. Evrg" = "St. D")  
+
+  #group all litter together 
+LTER_cover_origonal$Species <- recode(LTER_cover_origonal$Species, "Eri vag litter" = "litter")
+
+```
+
+**Now you can remove any data that you will not need for the analysis. In this case we do not want to include block 4**
+
+- we do not use block 4 because its not a true replicate of blocks 1-3
+
+```{r}
+
+LTER_cover_origonal <- LTER_cover_origonal[!LTER_cover_origonal$Block == "4", ]
+
+```
+
+**vectors for assigning functional groups**
+```{r}
+
+bare <- c("Bare ground")
+dec_shrub <- c("Deciduous shrubs")
+ev_shrub <- c("Evergreen shrubs")
+grass <- c("Grass")
+sedge <- c("Sedge")
+lichen <- c("Lichen")
+litter <- c("Litter")
+moss <- c("Moss")
+Forb <- c("Forb")
+St.D <- c("Standing dead")
+
+```
+
+**Subset the dataset by Species that you want to group into a functional group**
+
+```{r}
+
+  ## Bare ground ##
+bg <- subset(LTER_cover_origonal, species== "bare" | species== "frost boil") 
+
+  ## Deciduous shrubs ##
+ds <- subset(LTER_cover_origonal, species== "Bet nan" | species== "Vac uli" | species== "Sal pul" | species== "Arc alp" | species== "Sal phl" | species== "Sal arc" | species== "Sal ret")
+
+ ## Evergreen shrubs ##
+es <- subset(LTER_cover_origonal, species== "Emp nig" | species== "Led pal" | species== "Vac vit" | species== "Cas tet" | species== "And pol" | species== "Dry int")
+
+ ## Graminoid ##
+gr <- subset(LTER_cover_origonal, Species== "grass" | Species== "graminoid")
+
+ ## Sedge ##
+sed <- subset(LTER_cover_origonal, Species== "Eri vag")
+
+
+  ## Forb ##
+fb <- subset(LTER_cover_origonal, Species== "Ped lep" | Species== "Ped lap" | Species== "Pol bis" | Species== "Rub cha" | Species== "Luz sp." | Species== "Pet sp." | Species== "Hie alp" | Species== "Ped sp." | Species== "Arnica sp." | Species== "Ste edw" | Species== "Pet fri" | Species== "Ste lon" | Species== "Sau ang" | Species== "Hie sp." | Species== "Min sp." | Species== "Tof sp." | Species== "Ste sp." | Species== "dicot" | Species== "Lag gla" | Species== "Sax pun" | Species== "Pyr sec" | Species== "Equ arv" | Species== "Pol viv" | Species== "Tof coc" | Species== "Pyr sp.")
+
+  ## other groups ##
+
+lich <- subset(LTER_cover_origonal, Species== "lichen")
+
+lit <- subset(LTER_cover_origonal, Species== "litter")
+  
+ms <- subset(LTER_cover_origonal, Species== "moss")
+
+std <- subset(LTER_cover_origonal, Species== "St. D")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!LEFT OFF HERE!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+MyMerge       <- function(x, y){
+  df            <- merge(x, y, all = TRUE)
+  rownames(df)  <- df$Row.names
+  df$Row.names  <- NULL
+  return(df)
+}
+relcov.func_08_21           <- Reduce(MyMerge, list(bg1, bg2, ds1, ds2, ds3, ds4, ds5, ds6, ds7, es1, es2, es3, es4, es5, es6, gram1, gram2, gram3, forb1, forb2, forb3, forb4, forb5, forb6, forb7, forb8, forb9, forb10, forb11, forb12, forb13, forb14, forb15, forb16, forb17, forb18, forb19, forb20, forb21, forb22, forb23, forb24, lichen, litter, ms, standing.d))
+
+
+#export this file
+
+write.csv(relcov.func_08_21, file = "relcov_func_all.csv")
+
+```
+
+## Statistics & graphing
+
+\#combine renamed groups
+
+```{r}
+
+#first we must sum the relative cover values across function groups within quadrats
+sum.func <- (relcov.func_08_21) %>% group_by(year, block, plot, quad, func.group) %>% summarise_at(vars(rel.cov), list(relcov = sum ), na.rm = TRUE)
+```
+
+subset into different years based on \# of quads measured per plot
+
+```{r}
+
+Q4 <- subset(sum.func, year== "2008")
+Q5 <- subset(sum.func, year== "2015" | year== "2020")
+Q8 <- subset(sum.func, year== "2010" | year== "2011" | year== "2012" | year== "2013" | year== "2014" | year== "2016" | year== "2017" | year== "2018" | year== "2019" |year== "2010" |year== "2021")
+
+```
+
+Calculate stats across quads within plots
+
+```{r}
+
+#Sum across quads in a plot
+Q4_sum_avg_quad <- (Q4) %>% group_by(year, block, plot, func.group) %>% summarise_at(vars(relcov), list(sum1 = sum), na.rm = TRUE)
+
+Q5_sum_avg_quad <- (Q5) %>% group_by(year, block, plot, func.group) %>% summarise_at(vars(relcov), list(sum1 = sum), na.rm = TRUE)
+
+Q8_sum_avg_quad <- (Q8) %>% group_by(year, block, plot, func.group) %>% summarise_at(vars(relcov), list(sum1 = sum), na.rm = TRUE)
+
+#Vectors for averages
+avg.Q4.quad <- c(Q4_sum_avg_quad$sum1/4)
+avg.Q5.quad <- c(Q5_sum_avg_quad$sum1/5)
+avg.Q8.quad <- c(Q8_sum_avg_quad$sum1/8)
+
+#creates and fills a new column with the average (by diving that sum by the number of reps specified)
+Q4_sum_avg_quad["avg.1"] <-avg.Q4.quad
+Q5_sum_avg_quad["avg.1"] <-avg.Q5.quad
+Q8_sum_avg_quad["avg.1"] <-avg.Q8.quad
+
+#-------------------------------------------------------------------------------------------------------#
+MyMerge       <- function(x, y){
+  df            <- merge(x, y, all = TRUE)
+  rownames(df)  <- df$Row.names
+  df$Row.names  <- NULL
+  return(df)
+}
+Avg.func.quad           <- Reduce(MyMerge, list(Q4_sum_avg_quad, Q5_sum_avg_quad, Q8_sum_avg_quad))
+
+#export this file
+write.csv(Avg.func.quad, file = "avg_relcov_quad.csv")
+```
+
+Calculate stats across blocks
+
+```{r}
+
+Avg.func.block <- (Avg.func.quad) %>% group_by(year, plot, func.group) %>% summarise_at(vars(avg.1), list(avg.2 = mean, block.sd = sd), na.rm = TRUE)
+
+#export this file
+write.csv(Avg.func.block, file = "avg_relcov_block.csv")
+
+```
+
+\#\#line graph \~ average rel.cov
+
+```{r}
+#specify factor levels for fertilization and clipping treatments 
+
+Avg.func.block$plot <- factor(Avg.func.block$plot, levels = c("CT", "F2", "F5", "F10"))
+Avg.func.block$func.group <- factor(Avg.func.block$func.group, levels = c("Deciduous shrubs", 
+                                                                          "Evergreen shrubs", 
+                                                                          "Eri vag",
+                                                                          "Graminoid",
+                                                                          "Forb",
+                                                                          "Lichen",
+                                                                          "Moss", 
+                                                                          "Litter",
+                                                                          "Standing dead",
+                                                                          "Bare ground"))
+
+#Creates stacked bar graph#
+ggplot(data = Avg.func.block, aes(fill=func.group, x = year, y = avg.2)) +
+  geom_bar(position="fill", stat="identity")+ #Percent stacked
+  #geom_bar(position="stack", stat="identity")+ #Stacked
+  scale_fill_manual(" ", values = c(
+    "Deciduous shrubs" = "#004c6d",
+                                                           #"Deciduous shrubs" = "red",
+                                                           "Evergreen shrubs" = "#6996b3",
+                                                           "Eri vag" = "#036d3f",
+                                                           #"Eri vag" = "red",
+                                                           "Graminoid"="#6fa17e",
+                                                          #"Graminoid"="red",
+                                                           "Forb"="#c4d6c8",
+                                                          #"Forb"="red",
+                                                           "Lichen"="#f6e8c3",
+                                                           "Moss"="#dfc27d",
+                                                           "Litter"="#bf812d",
+                                                           "Standing dead"="#8c510a",
+                                                           "Bare ground" = "#543005"))+
+  theme_light()+
+  theme(aspect.ratio = 9/18.5)+ #use for vertical stack only
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  theme(axis.text.x = element_text(color = "black", size = 8, angle = 45, hjust = 1))+
+  theme(axis.text.y = element_text(color = "black", size = 6))+
+  theme( axis.line = element_line(colour = "black", 
+                      size = 1, linetype = "solid"))+
+  scale_y_continuous(breaks= c(0, 0.50, 1))+
+  theme(plot.title = element_text(hjust = .5))+
+  labs(y = "Mean relative cover", x = " ")+ 
+  #theme(axis.title.y = element_text(face = "bold"))+
+    #theme(axis.title.x = element_text(face = "bold"))+
+  #theme(legend.direction="horizontal")+
+  #theme(legend.position="bottom")+
+  facet_grid(plot ~ .) #vertically stacked
+
+ggsave("stacked_bar_cover.jpeg")
+```
